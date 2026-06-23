@@ -48,7 +48,7 @@ function formatWikidataDate(dateString, precision) {
 function loadPrimaryData() {
   doPreProcessing();
 
-  populateProvinceTypesData() // BERUBAH: Dulu populateDesignationTypesData
+  populateProvinceTypesData() 
     .then(() => {
       return populateCoordinatesData().then(populateMapAndIndex);
     })
@@ -82,7 +82,7 @@ function doPreProcessing() {
 }
 
 // ============================================================
-// KODE BARU: PEMBENTUKAN KELOMPOK PROVINSI OTOMATIS
+// PEMBENTUKAN KELOMPOK PROVINSI OTOMATIS
 // ============================================================
 function populateProvinceTypesData() {
   return queryWdqsThenProcess(
@@ -130,12 +130,6 @@ function populateProvinceTypesData() {
         let precision = result.tahunPresisi ? result.tahunPresisi.value : 9;
         record.tahunBerdiri = formatWikidataDate(result.tahunBerdiriMentah.value, precision);        
         record.rawTahunBerdiri = result.tahunBerdiriMentah.value.replace(/^[+-]/, '');
-      }
-
-      // LOGIKA KLASTER MASJID PENTING
-      let statusKlaster = result.isKlasterPenting ? result.isKlasterPenting.value : "false";      
-      if (statusKlaster === "true") {
-        record.masukKlasterPenting = true;
       }
     },
     function() {
@@ -305,7 +299,7 @@ function renderDynamicDataInPanel(qid) {
 }
 
 // ============================================================
-// KODE BARU: MENGHITUNG TOTAL MASJID PER PROVINSI
+// MENGHITUNG TOTAL MASJID PER PROVINSI
 // ============================================================
 function populateProvinceIndex() {
   // Pastikan indeks induk ada
@@ -349,7 +343,7 @@ function populateMapAndIndex() {
 }
 
 // ============================================================
-// KODE BARU: MENYUNTIKKAN DATA MARKER & DAFTAR KE INDEKS PROVINSI
+// MENYUNTIKKAN DATA MARKER & DAFTAR KE INDEKS PROVINSI
 // ============================================================
 function populateProvinceIndexNodes() {
   Object.values(Records).forEach(record => {
@@ -415,9 +409,6 @@ function generateFilterSelect() {
       if (pilihan === 'filter-usia-50') {
         currentUsiaFilter = 'usia_50'; 
       } 
-      else if (pilihan === 'filter-klaster') {
-        currentUsiaFilter = 'klaster_penting';
-      }
       applyIntersectionFilter();
     });
   }
@@ -532,10 +523,7 @@ function applyIntersectionFilter(preventZoom = false) {
     }
 
     let matchUsia = true;
-    if (currentUsiaFilter === 'klaster_penting') {
-      matchUsia = record.masukKlasterPenting === true;
-    }
-    else if (currentUsiaFilter === 'usia_50') {
+    if (currentUsiaFilter === 'usia_50') {
       if (record.rawTahunBerdiri) {
         let tahunBangunan = parseInt(record.rawTahunBerdiri.substring(0, 4));
         let batasTahun = new Date().getFullYear() - 50;
@@ -633,16 +621,7 @@ function generateRecordDetails(qid) {
     }
   }
 
-  let isMasjidBesar = (record.masukKlasterPenting === true); 
-  let teksJudul = 'Informasi'; 
-  
-  if (isBersejarah && isMasjidBesar) {
-    teksJudul = 'Masjid Besar dan Bersejarah';
-  } else if (isBersejarah) {
-    teksJudul = 'Masjid Bersejarah';
-  } else if (isMasjidBesar) {
-    teksJudul = 'Masjid Besar';
-  }
+  let teksJudul = isBersejarah ? 'Masjid Bersejarah' : 'Informasi';
 
   let designationsHtml = `<h2 style="margin-top:10px">${teksJudul} ${tautanSuntingRingkasan}</h2>`;
   designationsHtml += '<ul class="designations">';
@@ -650,7 +629,7 @@ function generateRecordDetails(qid) {
   let isFirstDesignation = true; 
 
   // ============================================================
-  // KODE BARU: CETAK LOKASI BERDASARKAN PROVINSI
+  // CETAK LOKASI BERDASARKAN PROVINSI
   // ============================================================
   Object.keys(record.designations).forEach(provQid => {
 
@@ -927,7 +906,6 @@ class Record {
     this.events = [];
     this.areaTags = new Set();
     this.vicinityImages = [];
-    this.masukKlasterPenting = false;
   }
 }
 
